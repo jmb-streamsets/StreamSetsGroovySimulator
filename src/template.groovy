@@ -5,11 +5,17 @@ import sdc.simulator.sdc.Sdc
 import sdc.simulator.sdc.SdcSimulator
 
 static void main(String[] args) {
-    //***************************************************************************
-    // Step 0: Create the SDC simulator
-    //***************************************************************************
+
+/**
+ * Create an instance object of the SdcSimulator
+ **/
     def simulator = new SdcSimulator()
 
+/**
+ * Create an instance object of the RandomDateGenerator
+ * It is returning a random date for the past or the future
+ * Check the class to get more insight
+ **/
     def randomDateGenerator = new RandomDateGenerator() // <---  helper function for the `simulator.createBatch`
 
     println "***************************************************"
@@ -95,14 +101,15 @@ static void main(String[] args) {
             record.value['myList'] = [1, 2, 3, 4]
 
             // Modify an existing list entry
-            record.value['myList'][0] = 5
+            ((List) record.value['myList'])[0] = 5
 
             // Assign a integer type to a field and value null
             record.value['null_int'] = sdc.NULL_INTEGER
 
             // Check if the field is NULL_INTEGER. If so, assign a value
-            if (sdc.getFieldNull(record, '/null_int') == sdc.NULL_INTEGER)
+            if (sdc.getFieldNull(record, '/null_int') == sdc.NULL_INTEGER) {
                 record.value['null_int'] = 123
+            }
 
             // Create a new record with map field
             def newRecord = sdc.createRecord(record.sourceId + ':newRecordId')
@@ -115,12 +122,22 @@ static void main(String[] args) {
             // Modify a record header attribute entry
             record.attributes['name'] = record.attributes['first_name'] + ' ' + record.attributes['last_name']
 
+            // copy sdc.state item to a record field
+            record.value['sdc_state'] = simulator.sdc.state['my-state-variable']
+
             // Get a record header with field names ex. get sourceId and errorCode
             String sourceId = record.sourceId
             String errorCode = ''
             if (record.errorCode) {
                 errorCode = record.errorCode
             }
+
+            // Create an Event then send it to the event lane
+            def evt = sdc.createEvent("unknown", 1)
+            evt.value = sdc.createMap(true)
+            evt.value['information'] = 'An unknown entity'
+            evt.attributes['prop-01'] = '---prop-01---'
+            sdc.toEvent(evt)
 
             sdc.output.write(record)
         } catch (Exception e) {

@@ -3,8 +3,6 @@ package src
 import sdc.simulator.sdc.Record
 import sdc.simulator.sdc.Sdc
 import sdc.simulator.sdc.SdcSimulator
-import src.Direction
-import src.RandomDateGenerator
 
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit

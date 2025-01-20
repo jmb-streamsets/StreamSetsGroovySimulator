@@ -7,9 +7,18 @@ import sdc.simulator.sdc.SdcSimulator
 static void main(String[] args) {
 
 /**
+ * Create Pipeline Parameters
+ **/
+    Map pipelineParameters = [
+            "param1": "value1",
+            "param2": 42,
+            "param3": true
+    ]
+
+/**
  * Create an instance object of the SdcSimulator
  **/
-    def simulator = new SdcSimulator()
+    def simulator = new SdcSimulator(pipelineParameters)
 
 /**
  * Create an instance object of the RandomDateGenerator
@@ -30,15 +39,11 @@ static void main(String[] args) {
  *
  * Copy the code in between this comment blocks then paste it to your groovy evaluator Init Script Box
  *
- * Remember to remove `simulator.` from all simulator.sdc.state[] state variable
- *
- * To keep thing simple create sdc.state[] object to persist pipeline parameters like this :
- *
- *      sdc.state['logic-to-run'] = sdc.pipelineParameters()['logic']
+ * Remember to remove `simulator.` to have compatible code
  *
  * groovy evaluator Init Script Box -> Code Start*/
 
-    simulator.sdc.state['my-state-variable'] = 'from-pipeline-parameters'
+    simulator.sdc.state['my-state-variable'] = simulator.sdc.pipelineParameters()["param1"]
 
 /**
  * groovy evaluator Init Script Box -> Code End
@@ -93,6 +98,8 @@ static void main(String[] args) {
             // record.value = "Hello"
             // Change record root field value to a map value and create an entry
             // record.value = [firstName:'John', lastName:'Doe', age:25]
+
+            record.value['pipelineParameter'] = sdc.pipelineParameters()['param1']
 
             // Access a map entry
             record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']

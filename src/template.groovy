@@ -99,44 +99,39 @@ static void main(String[] args) {
             // record.value = "Hello"
             // Change record root field value to a map value and create an entry
             // record.value = [firstName:'John', lastName:'Doe', age:25]
-
             record.value['pipelineParameter'] = sdc.pipelineParameters()['param1']
-
             // Access a map entry
-            record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']
-
-            // Create a list entry
-            record.value['myList'] = [1, 2, 3, 4]
-
-            // Modify an existing list entry
-            ((List) record.value['myList'])[0] = 5
-
-            // Assign a integer type to a field and value null
-            record.value['null_int'] = sdc.NULL_INTEGER
-
-            // Check if the field is NULL_INTEGER. If so, assign a value
-            if (sdc.getFieldNull(record, '/null_int') == sdc.NULL_INTEGER) {
-                record.value['null_int'] = 123
-            }
-
-            // ordered map
-            record.value['map_true_ordered'] = sdc.createMap(true)
-
-            // just a map
-            record.value['map_false'] = sdc.createMap(false)
-
-            // Create a new record with map field
-            def newRecord = sdc.createRecord(record.sourceId + ':newRecordId')
-            newRecord.value = ['field1': 'val1', 'field2': 'val2']
-            newRecord.attributes['attr-xxxx'] = "xxxx"
-            def newMap = sdc.createMap(true)
-            newMap['field_xx'] = 'va_xxl'
-            newRecord.value['field_xx'] = newMap
-            sdc.output.write(newRecord)
+            record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']//            // Create a list entry
+//            record.value['myList'] = [1, 2, 3, 4]
+//
+//            // Modify an existing list entry
+//            ((List) record.value['myList'])[0] = 5
+//
+//            // Assign a integer type to a field and value null
+//            record.value['null_int'] = sdc.NULL_INTEGER
+//
+//            // Check if the field is NULL_INTEGER. If so, assign a value
+//            if (sdc.getFieldNull(record, '/null_int') == sdc.NULL_INTEGER) {
+//                record.value['null_int'] = 123
+//            }
+//
+//            // ordered map
+//            record.value['map_true_ordered'] = sdc.createMap(true)
+//
+//            // just a map
+//            record.value['map_false'] = sdc.createMap(false)
+//
+//            // Create a new record with map field
+//            def newRecord = sdc.createRecord(record.sourceId + ':newRecordId')
+//            newRecord.value = ['field1': 'val1', 'field2': 'val2']
+//            newRecord.attributes['attr-xxxx'] = "xxxx"
+//            def newMap = sdc.createMap(true)
+//            newMap['field_xx'] = 'va_xxl'
+//            newRecord.value['field_xx'] = newMap
+//            sdc.output.write(newRecord)
 
             // Modify a record header attribute entry
             record.attributes['name'] = record.attributes['first_name'] + ' ' + record.attributes['last_name']
-
             // copy sdc.state item to a record field
             record.value['my-state-variable'] = sdc.state['my-state-variable']
 
@@ -153,10 +148,7 @@ static void main(String[] args) {
             evt.value['information'] = 'An unknown entity'
             evt.attributes['prop-01'] = '---prop-01---'
             sdc.toEvent(evt)
-
             sdc.output.write(record)
-
-
         } catch (Exception e) {
             sdc.log.error "Exception Message: $e.message" // Message of the exception
             sdc.log.error "Exception Cause: $e.cause" // Cause of the exception (can be null)

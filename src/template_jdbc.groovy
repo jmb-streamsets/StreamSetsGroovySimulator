@@ -54,7 +54,7 @@ static void main(String[] args) {
     println "***************************************************"
     println " Step 1: Generating data for the input batch       "
     println "***************************************************"
-    int max_records = 5
+    int max_records = 1000
 
 /**
  * Custom code to create a data source that will be used by the simulator.createBatch
@@ -70,7 +70,7 @@ static void main(String[] args) {
     Class.forName(dbDriver)
     def connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)
     def statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-    def query = "SELECT TOP ($max_records) * FROM ${dbSchema}.${dbTable}"
+    def query = "SELECT TOP ($max_records) * FROM ${dbSchema}.${dbTable} ORDER BY 1"
     def resultSet = statement.executeQuery(query)
     ResultSetMetaData metaData = resultSet.getMetaData()
     int columnCount = metaData.getColumnCount()
@@ -82,12 +82,20 @@ static void main(String[] args) {
      **/
     simulator.createBatch(max_records) { Record record, int i ->
         record.value = Sdc.createMap(true)
+
+        /**
+         * Read a record of the Query result set then duplicate all the column of the record to the new SDC record structure
+         **/
         resultSet.next()
         (1..columnCount).each { index ->
             def columnName = metaData.getColumnLabel(index)
             def value = resultSet.getObject(index)
             record.value[columnName] = value
         }
+
+        /**
+         * Add many attributes as needed for the use case         *
+         **/
         record.attributes['jdbc.tables'] = "ComplexPKTable"
         record.attributes['jdbc.primaryKeySpecification'] = '{"id":{"type":4,"datatype":"INTEGER","size":11,"precision":10,"scale":0,"signed":true,"currency":false}}'
         record.attributes['jdbc.vendor'] = 'Microsoft'

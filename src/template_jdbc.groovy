@@ -1,8 +1,13 @@
 package src
 
+
 import sdc.simulator.sdc.Record
 import sdc.simulator.sdc.Sdc
 import sdc.simulator.sdc.SdcSimulator
+
+import java.sql.DriverManager
+import java.sql.ResultSet
+import java.sql.ResultSetMetaData
 
 static void main(String[] args) {
 
@@ -10,9 +15,7 @@ static void main(String[] args) {
  * Create Pipeline Parameters
  **/
     Map pipelineParameters = [
-            "param1": "value1",
-            "param2": 42,
-            "param3": true
+            "capitalize": false,
     ]
 
 /**
@@ -25,7 +28,6 @@ static void main(String[] args) {
  * It is returning a random date for the past or the future
  * Check the class to get more insight
  **/
-    def randomDateGenerator = new RandomDateGenerator() // <---  helper function for the `simulator.createBatch`
 
     println "***************************************************"
     println " SDC Simulator for groovy code started version 0.1 "
@@ -43,7 +45,7 @@ static void main(String[] args) {
  *
  * groovy evaluator Init Script Box -> Code Start*/
 
-    simulator.sdc.state['my-state-variable'] = simulator.sdc.pipelineParameters()["param1"]
+    simulator.sdc.state['list'] = ['item1', 'item2']
 
 /**
  * groovy evaluator Init Script Box -> Code End
@@ -58,19 +60,35 @@ static void main(String[] args) {
     println "***************************************************"
     println " Step 1: Generating data for the input batch       "
     println "***************************************************"
-    simulator.createBatch(1) { Record record, int i ->
+    int max_records = 5
+    def dbUrl = 'jdbc:sqlserver://172.16.0.178:1433;Encrypt=False;TrustServerCertificate=True;databaseName=STREAMSETS'
+    def dbUser = 'sa'
+    def dbPassword = 'DuufhNG9188'
+    def dbDriver = 'com.microsoft.sqlserver.jdbc.SQLServerDriver'
+    Class.forName(dbDriver)
+    def connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)
+    def statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+    def query = "SELECT TOP ($max_records) * FROM dbo.ComplexPKTable"
+    def resultSet = statement.executeQuery(query)
+    ResultSetMetaData metaData = resultSet.getMetaData()
+    int columnCount = metaData.getColumnCount()
 
+    simulator.createBatch(max_records) { Record record, int i ->
         record.value = Sdc.createMap(true)
-        record.value['id'] = i
-        record.value['firstName'] = 'John'
-        record.value['lastName'] = 'Doe'
-        record.value['created_on_ts'] = randomDateGenerator.generateRandomDate(Direction.PAST, 600)
-
-        record.attributes['jdbc.tables'] = "person"
+        resultSet.next()
+        (1..columnCount).each { index ->
+            def columnName = metaData.getColumnLabel(index)
+            def value = resultSet.getObject(index)
+            record.value[columnName] = value
+        }
+        record.attributes['jdbc.tables'] = "ComplexPKTable"
         record.attributes['jdbc.primaryKeySpecification'] = '{"id":{"type":4,"datatype":"INTEGER","size":11,"precision":10,"scale":0,"signed":true,"currency":false}}'
-        record.attributes['jdbc.vendor'] = 'Snowflake'
-
+        record.attributes['jdbc.vendor'] = 'Microsoft'
     }
+
+    statement.close()
+    connection.close()
+
 /**
  * simulator.createBatch end*/
 
@@ -94,69 +112,14 @@ static void main(String[] args) {
  * groovy evaluator Script Box -> Code Start
  * */
         try {
-
-            // Change record root field value to a String value.
-            // record.value = "Hello"
-            // Change record root field value to a map value and create an entry
-            // record.value = [firstName:'John', lastName:'Doe', age:25]
-
-            record.value['pipelineParameter'] = sdc.pipelineParameters()['param1']
-
-            // Access a map entry
-            record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']
-
-            // Create a list entry
-            record.value['myList'] = [1, 2, 3, 4]
-
-            // Modify an existing list entry
-            ((List) record.value['myList'])[0] = 5
-
-            // Assign a integer type to a field and value null
-            record.value['null_int'] = sdc.NULL_INTEGER
-
-            // Check if the field is NULL_INTEGER. If so, assign a value
-            if (sdc.getFieldNull(record, '/null_int') == sdc.NULL_INTEGER) {
-                record.value['null_int'] = 123
+            if (sdc.pipelineParameters()['capitalize']) {
+                record.value.each { String name, Object value ->
+                    record.value[name] = ((String) record.value[name]).toUpperCase()
+                }
             }
 
-            // ordered map
-            record.value['map_true_ordered'] = sdc.createMap(true)
-
-            // just a map
-            record.value['map_false'] = sdc.createMap(false)
-
-            // Create a new record with map field
-            def newRecord = sdc.createRecord(record.sourceId + ':newRecordId')
-            newRecord.value = ['field1': 'val1', 'field2': 'val2']
-            newRecord.attributes['attr-xxxx'] = "xxxx"
-            def newMap = sdc.createMap(true)
-            newMap['field_xx'] = 'va_xxl'
-            newRecord.value['field_xx'] = newMap
-            sdc.output.write(newRecord)
-
-            // Modify a record header attribute entry
-            record.attributes['name'] = record.attributes['first_name'] + ' ' + record.attributes['last_name']
-
-            // copy sdc.state item to a record field
-            record.value['my-state-variable'] = sdc.state['my-state-variable']
-
-            // Get a record header with field names ex. get sourceId and errorCode
-            String sourceId = record.sourceId
-            String errorCode = ''
-            if (record.errorCode) {
-                errorCode = record.errorCode
-            }
-
-            // Create an Event then send it to the event lane
-            def evt = sdc.createEvent("unknown", 1)
-            evt.value = sdc.createMap(true)
-            evt.value['information'] = 'An unknown entity'
-            evt.attributes['prop-01'] = '---prop-01---'
-            sdc.toEvent(evt)
 
             sdc.output.write(record)
-
-
         } catch (Exception e) {
             sdc.log.error "Exception Message: $e.message" // Message of the exception
             sdc.log.error "Exception Cause: $e.cause" // Cause of the exception (can be null)
@@ -165,7 +128,6 @@ static void main(String[] args) {
             e.stackTrace.each { sdc.log.error it as String } // Print each stack trace element
             sdc.error.write(record, "Something is not cool here...")
         }
-
 /**
  * groovy evaluator Script Box -> Code End
  **/
@@ -182,7 +144,7 @@ static void main(String[] args) {
  *
  * Remember to remove `simulator.` from all simulator.sdc.state[] state variable
  *
- * groovy evaluator Destroy Script Box -> Code Start
+ * groovy evaluator Init Script Box -> Code Start
  * */
     simulator.sdc.state['logic-to-run'] = null
 /**

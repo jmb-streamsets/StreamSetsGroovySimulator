@@ -8,10 +8,16 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 static void main(String[] args) {
+
+    /**
+     * Create Pipeline Parameters
+     **/
+    Map pipelineParameters = ["param-1": "empty", "param-2": 1000]
+
     //***************************************************************************
     // Step 0: Create the SDC simulator
     //***************************************************************************
-    def simulator = new SdcSimulator()
+    def simulator = new SdcSimulator(pipelineParameters)
 
     def randomDateGenerator = new RandomDateGenerator() // <---  helper function for the `simulator.createBatch`
 
@@ -35,7 +41,7 @@ static void main(String[] args) {
  *
  * groovy evaluator Init Script Box -> Code Start*/
 
-    simulator.sdc.state['logic-to-run'] = 'logic-1'
+    simulator.sdc.state['logic-to-run'] = simulator.sdc.pipelineParameters()["param-1"]
     // <---  In simulator just assigned your pipeline parameters this way
 
     MessageDigest md = MessageDigest.getInstance("MD5")

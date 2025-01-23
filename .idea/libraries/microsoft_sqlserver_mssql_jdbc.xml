@@ -1,0 +1,23 @@
+<component name="libraryTable">
+  <library name="microsoft.sqlserver.mssql.jdbc" type="repository">
+    <properties maven-id="com.microsoft.sqlserver:mssql-jdbc:11.2.0.jre17" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/mssql-jdbc-11.2.0.jre17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/msal4j-1.13.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/oauth2-oidc-sdk-9.35.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcip-annotations-1.0-1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/content-type-2.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lang-tag-1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/nimbus-jose-jwt-9.22.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/json-smart-2.4.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/accessors-smart-2.4.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/asm-9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.36.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.13.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.13.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.13.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

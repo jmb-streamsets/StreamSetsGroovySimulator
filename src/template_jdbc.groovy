@@ -15,7 +15,7 @@ static void main(String[] args) {
  * Create Pipeline Parameters
  **/
     Map pipelineParameters = [
-            "capitalize": false,
+            "capitalize": true,
     ]
 
 /**
@@ -51,28 +51,35 @@ static void main(String[] args) {
  * groovy evaluator Init Script Box -> Code End
  **/
 
-
-/**
- * simulator.createBatch start
- *
- * The `simulator.createBatch` closure is designed to generate a batch of data the same way
- **/
     println "***************************************************"
     println " Step 1: Generating data for the input batch       "
     println "***************************************************"
     int max_records = 5
+
+/**
+ * Custom code to create a data source that will be used by the simulator.createBatch
+ *
+ **/
     def dbUrl = 'jdbc:sqlserver://172.16.0.178:1433;Encrypt=False;TrustServerCertificate=True;databaseName=STREAMSETS'
     def dbUser = 'sa'
     def dbPassword = 'DuufhNG9188'
     def dbDriver = 'com.microsoft.sqlserver.jdbc.SQLServerDriver'
+    def dbSchema = 'dbo'
+    def dbTable = 'ComplexPKTable'
+
     Class.forName(dbDriver)
     def connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)
     def statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-    def query = "SELECT TOP ($max_records) * FROM dbo.ComplexPKTable"
+    def query = "SELECT TOP ($max_records) * FROM ${dbSchema}.${dbTable}"
     def resultSet = statement.executeQuery(query)
     ResultSetMetaData metaData = resultSet.getMetaData()
     int columnCount = metaData.getColumnCount()
 
+    /**
+     * simulator.createBatch start
+     *
+     * The `simulator.createBatch` closure is designed to generate a batch of data the same way
+     **/
     simulator.createBatch(max_records) { Record record, int i ->
         record.value = Sdc.createMap(true)
         resultSet.next()
@@ -117,8 +124,6 @@ static void main(String[] args) {
                     record.value[name] = ((String) record.value[name]).toUpperCase()
                 }
             }
-
-
             sdc.output.write(record)
         } catch (Exception e) {
             sdc.log.error "Exception Message: $e.message" // Message of the exception

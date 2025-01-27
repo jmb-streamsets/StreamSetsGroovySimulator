@@ -37,6 +37,12 @@ The `createBatch` closure is used to generate Data Collector record structure th
 The `processBatch` closure logic is designed to run the code that will be placed inside the script box of the groovy evaluator  
 ![Screenshot from 2025-01-23 17-01-38.png](images/Screenshot%20from%202025-01-23%2017-01-38.png)
 
+---
+# Destroy Script
+-  
+Like in the Groovy script box destroy section one would add any code logic needed to run when the pipeline enter the termination phase.  
+![Screenshot from 2025-01-27 13-55-14.png](images/Screenshot%20from%202025-01-27%2013-55-14.png)
+
 
 
 

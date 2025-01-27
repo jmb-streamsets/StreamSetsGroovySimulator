@@ -13,6 +13,12 @@ pipeline evaluator stage
 2. The [template.groovy](src/template.groovy) should be used to learn how to use the simulator
 3. Use the StreamSets Data Collector documentation for the groovy evaluator
 4. The API syntax of the simulator is identical to the one found in the StreamSets documentation
+
+- Templates: 
+  - [main.groovy](src/main.groovy)
+  - [template.groovy](src/template.groovy)
+  - [template_jdbc.groovy](src/template_jdbc.groovy)
+
 ---
 # Init Script
 -  

@@ -101,7 +101,8 @@ static void main(String[] args) {
             // record.value = [firstName:'John', lastName:'Doe', age:25]
             record.value['pipelineParameter'] = sdc.pipelineParameters()['param1']
             // Access a map entry
-            record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']//            // Create a list entry
+            record.value['fullName'] = record.value['firstName'] + ' ' + record.value['lastName']
+//            // Create a list entry
 //            record.value['myList'] = [1, 2, 3, 4]
 //
 //            // Modify an existing list entry
